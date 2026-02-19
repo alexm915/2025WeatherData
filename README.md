@@ -1,5 +1,9 @@
 # 2025WeatherData
+<<<<<<< HEAD
 = 添加DEV分支，DEV+Main分支
+=======
+> 添加DEV分支，DEV+Main分支
+>>>>>>> d30cfdf (update readme file)
 ## 0- 项目目录安排
     1. 主程序放在/project/idc/cpp (4个.cpp)
     2. 通用模块放到/projec/tools/cpp(20个.cpp)，如监控调度模块
