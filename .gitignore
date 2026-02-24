@@ -1,7 +1,6 @@
 # IDE
-.vscode/
-.public/.vscode
-.idea/
+**/.vscode/
+**/.idea/
 *.swp
 *~
 
