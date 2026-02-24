@@ -1,6 +1,7 @@
 # IDE
-**/.vscode/
-**/.idea/
+.vscode/
+.idea/
+*.code-workspace
 *.swp
 *~
 
