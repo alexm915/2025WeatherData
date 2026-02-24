@@ -5,24 +5,26 @@
 *.swp
 *~
 
-# CMake / build
+# CMake-Build
 build/
+cmake-build-*/
 *.o
 *.obj
 *.exe
 *.out
 
-# 日志 / 临时文件
+# logs-tmp
 *.log
 *.tmp
 *.cache
 
-# 系统
+# System
 .DS_Store
 Thumbs.db
 
-# 可选：外部库
-libs/
+# Binary
 *.a
+*.out
+*.o
 *.so
 *.dll
