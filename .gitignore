@@ -8,6 +8,7 @@
 # CMake-Build
 build/
 cmake-build-*/
+compile_commands.json
 *.o
 *.obj
 *.exe
