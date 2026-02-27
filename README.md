@@ -8,7 +8,13 @@
     1. 主程序放在/project/idc/cpp (4个.cpp)
     2. 通用模块放到/projec/tools/cpp(20个.cpp)，如监控调度模块
 ## 1- 程序总体框架
+    - 每个程序都要：参数检查并提供使用帮助、程序退出处理、日志记录
     1. 主程序
+        1) 根据站点参数stcode.ini生成站点的观测数据
+            - 读取stcode.ini中的每一行，拆分字段放入stlist容器
+            - 根据stlist中的参数生成观测数据,并放入datalist容器
+            - 根据datalist容器中的观测数据写入csv,xml,json三种文件
+        2)
     2. 监控调度
         - 调度模块procctl
         - 进程心跳(写进了项目框架_public.h中)

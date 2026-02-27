@@ -17,19 +17,19 @@ struct st_stcode {
 // 存放气象站点参数的容器
 list<struct st_stcode> stlist;
 // 将站点参数存放到stlist容器中的函数
-bool loadstcode(const string& inifile);
+bool loadstcode(const string &inifile);
 
 // 观测数据的结构体
 struct st_surfdata {
-  char obtid[11];      // 站点代码
-  char ddatetime[15];  // 数据时间：格式yyyymmddhh24miss，精确到分钟，秒固定填00
-  double t;            // 气温，单位：0.1摄氏度
-  double p;            // 气压，单位：0.1百帕
-  double u;            // 相对湿度，单位：0-100之间的值
-  double wd;           // 风向，单位：0-360之间的值
-  double wf;           // 风速，单位：0.1m/s
-  double r;            // 降水量，单位：0.1mm
-  double vis;          // 能见度，单位：0.1米
+  char obtid[11];     // 站点代码
+  char ddatetime[15]; // 数据时间：格式yyyymmddhh24miss，精确到分钟，秒固定填00
+  double t;           // 气温，单位：0.1摄氏度
+  double p;           // 气压，单位：0.1百帕
+  double u;           // 相对湿度，单位：0-100之间的值
+  double wd;          // 风向，单位：0-360之间的值
+  double wf;          // 风速，单位：0.1m/s
+  double r;           // 降水量，单位：0.1mm
+  double vis;         // 能见度，单位：0.1米
 };
 
 char strddatetime[15];
@@ -41,14 +41,14 @@ list<struct st_surfdata> datalist;
 void crtsurfdata();
 
 // 把datalist容器中的观测数据写入成csv,xml,json三种格式的文件的函数
-bool crtsurffile(const string& outpath, const string& datafmt);
+bool crtsurffile(const string &outpath, const string &datafmt);
 
 /*
   TODO: 1-程序参数检查，及使用帮助。
     1) 程序需要三个参数：站点参数文件stcode.ini, 生成数据的放置目录, 日志文件,
   输出数据文件的格式
 */
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   if (argc != 5) {
     cout << "Using:./crtsurfdata inifile outpath logfile datafmt\n";
     cout << "Examples:/project/idc/bin/crtsurfdata /project/idc/ini/stcode.ini "
@@ -77,7 +77,6 @@ int main(int argc, char* argv[]) {
   logfile.write("crtsurfdata 开始运行。\n");
 
   // 业务代码功能
-
   /*
     TODO: 4-读取气象站点参数文件stcode.ini，将参数放入容器中
         1)打开站点参数文件stcode.ini，读取每一行，拆分后存入到结构体变量st_stcode中，再将结构体变量放入到stlist容器中。拆分字符串用到ccmdstr类，具体用法看开发框架_public.h文件中的ccmdstr类的定义和实现。
@@ -100,18 +99,30 @@ int main(int argc, char* argv[]) {
   */
   // 获取观测数据的时间
   memset(strddatetime, 0, sizeof(strddatetime));
-  ltime(strddatetime, "yyyymmddhh24miss");  // 获取当前时间
-  strncpy(strddatetime + 12, "00", 2);      // 将秒固定填00
+  ltime(strddatetime, "yyyymmddhh24miss"); // 获取当前时间
+  strncpy(strddatetime + 12, "00", 2);     // 将秒固定填00
   // 生成观测数据
   crtsurfdata();
 
   /*
     TODO: 6- 将观测数据存入cvs, xml, json三种格式的文件中
+        1)把datalist容器中的观测数据写入成csv,xml,json三种格式的文件的函数crtsurffile()的实现，具体代码在本文件的后面。
+         2)生成数据文件的文件名格式：SURF_ZH_yyyymmddhh24miss_pid.datafmt，如：SURF_ZH_20260221092200_2254.csv
+          2.1)写入csv文件时，第一行是标题行，内容为：站点代码,数据时间,气温,气压,相对湿度,风向,风速,降雨量,能见度
+          2.2)写入xml文件时，第一行是<obtid>...</obtid><ddatetime>...</ddatetime><t>...</t><p>...</p><u>...</u><wd>...</wd><wf>...</wf><r>...</r><vis>...</vis><endl/>，最后一行是</data>
+          2.3)写入json文件时，第一行是{"data":[\n，最后一行是]}\n，每条记录之间用逗号分隔，最后一条记录后面不能有逗号。
+         3)生成的数据文件进行调试，确保正确生成了数据文件。
   */
   // strstr()函数的作用是查找字符串argv[4]中是否包含"csv"、"xml"、"json"，如果包含，就调用crtsurffile()函数生成对应格式的文件。
-  if (strstr(argv[4], "csv") != 0) crtsurffile(argv[2], "csv");
-  if (strstr(argv[4], "xml") != 0) crtsurffile(argv[2], "xml");
-  if (strstr(argv[4], "json") != 0) crtsurffile(argv[2], "json");
+  if (strstr(argv[4], "csv") != 0) {
+    crtsurffile(argv[2], "csv");
+  }
+  if (strstr(argv[4], "xml") != 0) {
+    crtsurffile(argv[2], "xml");
+  }
+  if (strstr(argv[4], "json") != 0) {
+    crtsurffile(argv[2], "json");
+  }
 
   // 结束运行记录日志
   logfile.write("crtsurfdata 运行结束。\n");
@@ -124,7 +135,7 @@ void EXIT(int sig) {
   // 此处\n\n，后一个\n是插入空白行, 使日志文件更清晰。
   exit(0);
 }
-bool loadstcode(const string& inifile) {
+bool loadstcode(const string &inifile) {
   cifile ifile;
   if (ifile.open(inifile) == false) {
     logfile.write("ifile.open(%s) failed.\n", inifile.c_str());
@@ -135,10 +146,10 @@ bool loadstcode(const string& inifile) {
   // 2-将每一行数据拆分，存入到结构体变量中
   // 3-将结构体变量放入到stlist容器中
   string strbuffer;
-  ifile.readline(strbuffer);  // stcode.ini标题不要扔掉
+  ifile.readline(strbuffer); // stcode.ini标题不要扔掉
 
-  ccmdstr cmdstr;    // 用于拆分字符串的类对象
-  st_stcode stcode;  // 站点参数结构体
+  ccmdstr cmdstr;   // 用于拆分字符串的类对象
+  st_stcode stcode; // 站点参数结构体
 
   // 读取行
   while (ifile.readline(strbuffer)) {
@@ -172,21 +183,21 @@ bool loadstcode(const string& inifile) {
 }
 
 void crtsurfdata() {
-  srand(time(0));  // 设置随机数种子
+  srand(time(0)); // 设置随机数种子
   st_surfdata stsurfdata;
 
-  for (auto& stcode : stlist) {
+  for (auto &stcode : stlist) {
     memset(&stsurfdata, 0, sizeof(st_surfdata));
     // 填充stsurfdata结构体
     strcpy(stsurfdata.obtid, stcode.obtid);
     strcpy(stsurfdata.ddatetime, strddatetime);
-    stsurfdata.t = rand() % 350;               // 气温，单位：0.1摄氏度
-    stsurfdata.p = rand() % 265 + 10000;       // 气压，单位：0.1百帕
-    stsurfdata.u = rand() % 101;               // 相对湿度，单位：0-100之间的值
-    stsurfdata.wd = rand() % 360;              // 风向，单位
-    stsurfdata.wf = rand() % 150;              // 风速，单位：0.1m/s
-    stsurfdata.r = rand() % 16;                // 降水量，
-    stsurfdata.vis = rand() % 50001 + 100000;  // 能见度，单位：0.1米
+    stsurfdata.t = rand() % 350;              // 气温，单位：0.1摄氏度
+    stsurfdata.p = rand() % 265 + 10000;      // 气压，单位：0.1百帕
+    stsurfdata.u = rand() % 101;              // 相对湿度，单位：0-100之间的值
+    stsurfdata.wd = rand() % 360;             // 风向，单位
+    stsurfdata.wf = rand() % 150;             // 风速，单位：0.1m/s
+    stsurfdata.r = rand() % 16;               // 降水量，
+    stsurfdata.vis = rand() % 50001 + 100000; // 能见度，单位：0.1米
 
     // 将将观测数据结构体stsurfdata放入到datalist容器中
     datalist.push_back(stsurfdata);
@@ -202,12 +213,12 @@ void crtsurfdata() {
   // }
 }
 
-bool crtsurffile(const string& outpath, const string& datafmt) {
+bool crtsurffile(const string &outpath, const string &datafmt) {
   // 拼接文件名，如：/tmp/idc/surfdata/SURF_ZH_20260221092200_2254.csv
   string strfilename = outpath + "/SURF_ZH_" + strddatetime + "_" +
                        to_string(getpid()) + "." + datafmt;
 
-  cofile ofile;  // 写入数据文件的对象
+  cofile ofile; // 写入数据文件的对象
   if (ofile.open(strfilename) == false) {
     logfile.write("ofile.open(%s) failed.\n", strfilename.c_str());
     return false;
@@ -219,10 +230,12 @@ bool crtsurffile(const string& outpath, const string& datafmt) {
         "站点代码,数据时间,气温,气压,相对湿度,风向,风速,降雨量,能见度\n");
 
   // 写入xml开始标签
-  if (datafmt == "xml") ofile.writeline("<data>\n");
-  if (datafmt == "json") ofile.writeline("{\"data\":[\n");
+  if (datafmt == "xml")
+    ofile.writeline("<data>\n");
+  if (datafmt == "json")
+    ofile.writeline("{\"data\":[\n");
 
-  for (auto& aa : datalist) {
+  for (auto &aa : datalist) {
     if (datafmt == "csv") {
       ofile.writeline("%s,%s,%.1f,%.1f,%d,%d,%.1f,%.1f,%.1f\n", aa.obtid,
                       aa.ddatetime, aa.t / 10.0, aa.p / 10.0, aa.u, aa.wd,
@@ -256,9 +269,11 @@ bool crtsurffile(const string& outpath, const string& datafmt) {
   }
 
   // 写入xml结束标签
-  if (datafmt == "xml") ofile.writeline("</data>\n");
+  if (datafmt == "xml")
+    ofile.writeline("</data>\n");
   // 写入json结束标签
-  if (datafmt == "json") ofile.writeline("]}\n");
+  if (datafmt == "json")
+    ofile.writeline("]}\n");
 
   ofile.closeandrename();
 
