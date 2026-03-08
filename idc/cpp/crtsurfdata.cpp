@@ -90,12 +90,12 @@ int main(int argc, char *argv[]) {
   /*
     TODO: 5- 根据站点参数stcode.ini文件生成观测数据(随机数)
         1)根据stlist容器中的站点参数，生成观测数据，并存放到datalist容器中。
-         2)生成观测数据的函数crtsurfdata()的实现，具体代码在本文件的后面。
+        2)生成观测数据的函数crtsurfdata()的实现，具体代码在本文件的后面。
           2.1)设置随机数种子
           2.2)填充st_surfdata结构体变量
             获取观测时间strddatime，作为全局变量;
           2.3)将观测数据结构体变量放入到datalist容器中
-         3)生成的观测数据进行调试，确保正确生成了数据。
+        3)生成的观测数据进行调试，确保正确生成了数据。
   */
   // 获取观测数据的时间
   memset(strddatetime, 0, sizeof(strddatetime));
@@ -107,11 +107,11 @@ int main(int argc, char *argv[]) {
   /*
     TODO: 6- 将观测数据存入cvs, xml, json三种格式的文件中
         1)把datalist容器中的观测数据写入成csv,xml,json三种格式的文件的函数crtsurffile()的实现，具体代码在本文件的后面。
-         2)生成数据文件的文件名格式：SURF_ZH_yyyymmddhh24miss_pid.datafmt，如：SURF_ZH_20260221092200_2254.csv
+        2)生成数据文件的文件名格式：SURF_ZH_yyyymmddhh24miss_pid.datafmt，如：SURF_ZH_20260221092200_2254.csv
           2.1)写入csv文件时，第一行是标题行，内容为：站点代码,数据时间,气温,气压,相对湿度,风向,风速,降雨量,能见度
           2.2)写入xml文件时，第一行是<obtid>...</obtid><ddatetime>...</ddatetime><t>...</t><p>...</p><u>...</u><wd>...</wd><wf>...</wf><r>...</r><vis>...</vis><endl/>，最后一行是</data>
           2.3)写入json文件时，第一行是{"data":[\n，最后一行是]}\n，每条记录之间用逗号分隔，最后一条记录后面不能有逗号。
-         3)生成的数据文件进行调试，确保正确生成了数据文件。
+        3)生成的数据文件进行调试，确保正确生成了数据文件。
   */
   // strstr()函数的作用是查找字符串argv[4]中是否包含"csv"、"xml"、"json"，如果包含，就调用crtsurffile()函数生成对应格式的文件。
   if (strstr(argv[4], "csv") != 0) {
@@ -252,14 +252,14 @@ bool crtsurffile(const string &outpath, const string &datafmt) {
     if (datafmt == "json") {
       ofile.writeline(
           "{\"obtid\":\"%s\",\"ddatetime\":\"%s\",\"t\":%.1f,\"p\":%.1f,"
-          "\"u\":%d,\"wd\":%d,\"wf\":%.1f,\"r\":%.1f,\"vis\":%.1f},\n",
+          "\"u\":%d,\"wd\":%d,\"wf\":%.1f,\"r\":%.1f,\"vis\":%.1f}",
           aa.obtid, aa.ddatetime, aa.t / 10.0, aa.p / 10.0, aa.u, aa.wd,
           aa.wf / 10.0, aa.r / 10.0, aa.vis / 10.0);
 
       // json格式的文件最后一个记录后面不能有逗号，所以在写入最后一个记录时，需要去掉逗号
       static int ii = 0;
       if (ii < datalist.size() - 1) {
-        // 不是最后一个记录，写入逗号
+        // 不是最后一个记录，写入逗号并换行
         ofile.writeline(",\n");
         ii++;
       } else {
