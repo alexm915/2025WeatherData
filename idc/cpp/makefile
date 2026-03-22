@@ -9,8 +9,14 @@ all:crtsurfdata
 
 crtsurfdata:crtsurfdata.cpp
 	g++ $(CFLAGS) -o crtsurfdata crtsurfdata.cpp $(PUBINCL) $(PUBCPP) -lm -lc
-	cp -f crtsurfdata ../bin/.
+	mv -f crtsurfdata ../bin/.
 
 clean:
-	rm -f crtsurfdata
+	rm -rf ../bin/*
 	rm -f /log/idc/crtsurfdata.log
+
+# 调试命令
+runmain:
+	/project/idc/bin/crtsurfdata /project/idc/ini/stcode.ini /tmp/idc/surfdata /log/idc/crtsurfdata.log csv,xml,json
+catmainlog:
+	cat /log/idc/crtsurfdata.log

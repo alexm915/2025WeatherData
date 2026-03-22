@@ -1,10 +1,11 @@
-#include "_public.h"
-using namespace idc;
+#include <cstdio>
+#include <stdlib.h>
+#include <unistd.h>
 
-// 进程心跳结构体
-struct st_proinfo {
-  int pid;        // 进程id
-  char pname[51]; // 进程名称, 可以为空
-  int timeout;    // 超时时间（秒）
-  time_t atime;   // 最后一次心跳时间
-};
+int main() {
+  while (true) {
+    printf("服务程序正在运行中...\n");
+    sleep(1);
+  }
+  return 0;
+}
