@@ -14,9 +14,10 @@ crtsurfdata:crtsurfdata.cpp
 clean:
 	rm -rf ../bin/*
 	rm -f /log/idc/crtsurfdata.log
+	rm -rf /tmp/idc/surfdata
 
 # 调试命令
 runmain:
-	/project/idc/bin/crtsurfdata /project/idc/ini/stcode.ini /tmp/idc/surfdata /log/idc/crtsurfdata.log csv,xml,json
+	/project/tools/bin/procctl 60 /project/idc/bin/crtsurfdata /project/idc/ini/stcode.ini /tmp/idc/surfdata /log/idc/crtsurfdata.log csv,xml,json
 catmainlog:
 	cat /log/idc/crtsurfdata.log

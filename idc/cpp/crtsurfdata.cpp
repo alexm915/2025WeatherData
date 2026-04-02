@@ -43,6 +43,9 @@ void crtsurfdata();
 // 把datalist容器中的观测数据写入成csv,xml,json三种格式的文件的函数
 bool crtsurffile(const string &outpath, const string &datafmt);
 
+// 进程心跳
+cpactive pactive;
+
 /*
   TODO: 1-程序参数检查，及使用帮助。
     1) 程序需要三个参数：站点参数文件stcode.ini, 生成数据的放置目录, 日志文件,
@@ -51,8 +54,12 @@ bool crtsurffile(const string &outpath, const string &datafmt);
 int main(int argc, char *argv[]) {
   if (argc != 5) {
     cout << "Using:./crtsurfdata inifile outpath logfile datafmt\n";
-    cout << "Examples:/project/idc/bin/crtsurfdata /project/idc/ini/stcode.ini "
+    cout << "Examples:/project/tools/bin/procctl 60 "
+            "/project/idc/bin/crtsurfdata /project/idc/ini/stcode.ini "
             "/tmp/idc/surfdata /log/idc/crtsurfdata.log csv,xml,json\n\n";
+
+    cout << "本程序用于生成气象站点观测的分钟数据，程序每分钟运行一次，由调度模"
+            "块启动。\n";
 
     cout << "inifile  气象站点参数文件名。\n";
     cout << "outpath  气象站点数据文件存放的目录。\n";
@@ -66,6 +73,9 @@ int main(int argc, char *argv[]) {
   closeioandsignal(true);
   signal(SIGINT, app_exit);
   signal(SIGTERM, app_exit);
+
+  // 写入本程序的进程心跳
+  pactive.addpinfo(10, "crtsurfdata");
 
   // TODO: 2-程序运行日志记录
   if (logfile.open(argv[3]) == false) {
