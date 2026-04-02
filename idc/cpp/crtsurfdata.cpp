@@ -2,7 +2,7 @@
 using namespace idc;
 
 clogfile logfile;
-void EXIT(int sig);
+void app_exit(int sig);
 
 // 气象站点参数的结构体
 struct st_stcode {
@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
 
   // TODO: 3-处理程序退出：忽略全部信号，关闭IO; 设置2,15的信号处理函数
   closeioandsignal(true);
-  signal(SIGINT, EXIT);
-  signal(SIGTERM, EXIT);
+  signal(SIGINT, app_exit);
+  signal(SIGTERM, app_exit);
 
   // TODO: 2-程序运行日志记录
   if (logfile.open(argv[3]) == false) {
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
         3)读取站点参数文件stcode.ini的内容进行调试，确保正确读取和拆分了数据。
   */
   if (loadstcode(argv[1]) == false) {
-    EXIT(-1);
+    app_exit(-1);
   }
 
   /*
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void EXIT(int sig) {
+void app_exit(int sig) {
   logfile.write("程序退出,sig=%d\n\n", sig);
   // 此处\n\n，后一个\n是插入空白行, 使日志文件更清晰。
   exit(0);
