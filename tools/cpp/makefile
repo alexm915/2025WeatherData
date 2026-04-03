@@ -39,7 +39,12 @@ clean:
 	rm -rf ../bin/*
 	rm -rf /tmp/log/checkproc.log
 
+runstart:
+	/project/idc/cpp/start.sh
+runstop:
+	/project/idc/cpp/stop.sh
 
+# 调试命令
 runprocctl:
 	/project/tools/bin/procctl 60 /project/idc/bin/crtsurfdata /project/idc/ini/stcode.ini /tmp/idc/surfdata /log/idc/crtsurfdata.log csv,xml,json
 runcheckproc:

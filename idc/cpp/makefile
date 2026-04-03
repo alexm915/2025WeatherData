@@ -16,6 +16,11 @@ clean:
 	rm -f /log/idc/crtsurfdata.log
 	rm -rf /tmp/idc/surfdata
 
+runstart:
+	/project/idc/cpp/start.sh
+runstop:
+	/project/idc/cpp/stop.sh
+
 # 调试命令
 runmain:
 	/project/tools/bin/procctl 60 /project/idc/bin/crtsurfdata /project/idc/ini/stcode.ini /tmp/idc/surfdata /log/idc/crtsurfdata.log csv,xml,json
