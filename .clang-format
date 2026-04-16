@@ -12,12 +12,12 @@ Standard: c++20
 # 1. Global Layout
 # ============================================================
 
-IndentWidth: 2                # 缩进 2 空格
-TabWidth: 2                   # Tab 等价为 2 空格
-UseTab: Never                 # 禁止使用 Tab
-ColumnLimit: 100              # 最大行宽 100
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+ColumnLimit: 100
 
-MaxEmptyLinesToKeep: 1        # 最多保留 1 行空行
+MaxEmptyLinesToKeep: 1
 
 
 # ============================================================
@@ -32,35 +32,35 @@ ReferenceAlignment: Pointer   # int& ref
 # 3. Brace Wrapping
 # ============================================================
 
-BreakBeforeBraces: Attach     # K&R 风格
+BreakBeforeBraces: Attach
 
 
 # ============================================================
 # 4. Control & Function Layout
 # ============================================================
 
-# ---- 单行压缩策略 ----
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortEnumsOnASingleLine: false
 
-# ---- 模板相关 ----
 SpacesInAngles: false
 BreakTemplateDeclarations: Yes
 BreakBeforeConceptDeclarations: true
 
-# ---- 函数参数与调用 ----
 BinPackParameters: false
 BinPackArguments: false
 
-# ---- 构造函数初始化列表 ----
+# 4lines to fix function parameters.
+AlignAfterOpenBracket: BlockIndent
+ContinuationIndentWidth: 2
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 
-# ---- 控制语句括号空格 ----
 SpaceBeforeParens: ControlStatements
 
-# ---- 返回类型控制 ----
 BreakAfterReturnType: None
 
 
@@ -73,23 +73,18 @@ IncludeBlocks: Regroup
 
 IncludeCategories:
 
-  # 1️⃣ C/C++ 标准库
   - Regex: '^<(algorithm|array|atomic|chrono|cmath|condition_variable|cstdint|deque|functional|future|iostream|map|memory|mutex|optional|queue|set|string|thread|tuple|unordered_map|unordered_set|utility|vector)>'
     Priority: 1
 
-  # 2️⃣ 第三方库（按需扩展）
   - Regex: '^<(boost|fmt|spdlog)/.*>'
     Priority: 2
 
-  # 3️⃣ 测试框架
   - Regex: '^<(gtest|gmock)/.*>'
     Priority: 3
 
-  # 4️⃣ 公司公共基础库
   - Regex: '^"public/.*'
     Priority: 4
 
-  # 5️⃣ 其他（当前模块、本地头文件）
   - Regex: '.*'
     Priority: 5
 
@@ -98,8 +93,5 @@ IncludeCategories:
 # 6. Namespace Rules
 # ============================================================
 
-NamespaceIndentation: None    # namespace 不额外缩进
-FixNamespaceComments: true    # 自动生成 namespace 结束注释
-
-
-...
+NamespaceIndentation: None
+FixNamespaceComments: true

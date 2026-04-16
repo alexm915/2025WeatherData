@@ -42,9 +42,12 @@
 - 通过 start.sh脚本, stop.sh脚本来启动/停止服务程序
 - 系统启动时就运行程序(以root启动守护模块)，/etc/rc.local加入以下内容:
   ```bash
-  #启动数据共享平台的服务程序
+  # 以下是开机自启动程序
+
+  # 以root用户启动调度模块
   /project/tools/bin/procctl 10 /project/tools/bin/checkproc /tmp/log/checkproc.log
-  #意思是切换到普通用户alex去执行此脚本
+
+  # 以普通用户alex运行start.sh脚本
   su - alex -c "/project/idc/cpp/start.sh
   ```
 ## （二）两个工具

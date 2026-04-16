@@ -10,7 +10,7 @@ CFLAGS = -g
 #CFLAGS = -O2
 
 
-all:procctl checkproc deletefiles gzipfiles server_test checkproc_test_demo checkproc_test_demo2
+all:procctl checkproc deletefiles gzipfiles server_test checkproc_test_demo checkproc_test_demo2 ftpgetfiles
 
 procctl:procctl.cpp
 	g++ procctl.cpp -o procctl
@@ -24,6 +24,11 @@ deletefiles:deletefiles.cpp
 gzipfiles:gzipfiles.cpp
 	g++ $(CFLAGS) gzipfiles.cpp -o gzipfiles $(PUBLICL) $(PUBCPP)
 	mv -f gzipfiles ../bin/.
+ftpgetfiles:ftpgetfiles.cpp
+# ftpgetfiles程序需要链接libftp.a库和_ftp.cpp源文件，因为它调用了开发框架提供的ftpgetfiles函数
+# -no-pie选项是为了生成一个非位置无关的可执行文件，兼容传统PIE可执行文件
+	g++ $(CFLAGS) -g ftpgetfiles.cpp -no-pie -o ftpgetfiles $(PUBLICL) $(PUBCPP) /project/public/libftp.a /project/public/_ftp.cpp
+	mv -f ftpgetfiles ../bin/.
 
 server_test:server_test.cpp
 	g++ $(CFLAGS) server_test.cpp -o server_test $(PUBLICL) $(PUBCPP)
@@ -37,14 +42,34 @@ checkproc_test_demo2:checkproc_test_demo2.cpp
 
 clean:
 	rm -rf ../bin/*
-	rm -rf /tmp/log/checkproc.log
+#	rm -rf /tmp/log/checkproc.log
+
+
+##########################################################
+############ 调试命令
+##########################################################
+
+cleanftpgetlog:
+	rm -rf /log/idc/ftpgetfiles_surfdata.log
+cleanftplocal:
+	rm -rf /idcdata/surfdata/*
 
 runstart:
 	/project/idc/cpp/start.sh
 runstop:
 	/project/idc/cpp/stop.sh
+runftpget_help:
+	/project/tools/bin/ftpgetfiles
+runftpget2:
+#	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1</host><mode>1</mode><username>ftp_remote</username><password>225166</password><remotepath>idcdata/surfdata</remotepath><localpath>/idcdata/surfdata</localpath><matchname>SURF_ZH*.XML,SURF_ZH*.CSV</matchname>"
+	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1</host><mode>1</mode><username>alex</username><password>225166</password><remotepath>/tmp/idc/surfdata</remotepath><localpath>/idcdata/surfdata</localpath><matchname>SURF_ZH*.XML,SURF_ZH*.CSV</matchname><ptype>2</ptype><remotepathbak>/tmp/idc/surfdatabak</remotepathbak>"
+runftpget1:
+	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1</host><mode>1</mode><username>alex</username><password>225166</password><remotepath>/tmp/idc/surfdata</remotepath><localpath>/idcdata/surfdata</localpath><matchname>SURF_ZH*.XML,SURF_ZH*.CSV</matchname><ptype>1</ptype><remotepathbak>/tmp/idc/surfdatabak</remotepathbak>"
+runftpget3:
+	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1</host><mode>1</mode><username>alex</username><password>225166</password><remotepath>/tmp/idc/surfdata</remotepath><localpath>/idcdata/surfdata</localpath><matchname>SURF_ZH*.XML,SURF_ZH*.CSV</matchname><ptype>3</ptype><remotepathbak>/tmp/idc/surfdatabak</remotepathbak>"
+catftpgetlog:
+	cat /log/idc/ftpgetfiles_surfdata.log
 
-# 调试命令
 runprocctl:
 	/project/tools/bin/procctl 60 /project/idc/bin/crtsurfdata /project/idc/ini/stcode.ini /tmp/idc/surfdata /log/idc/crtsurfdata.log csv,xml,json
 runcheckproc:
