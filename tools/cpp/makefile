@@ -48,41 +48,16 @@ clean:
 ##########################################################
 ############ 调试命令
 ##########################################################
-
-cleanftpgetlog:
-	rm -rf /log/idc/ftpgetfiles_surfdata.log
-cleanftplocal:
-	rm -rf /idcdata/surfdata/*
-
 runstart:
 	/project/idc/cpp/start.sh
 runstop:
 	/project/idc/cpp/stop.sh
-runftpget_help:
-	/project/tools/bin/ftpgetfiles
-runftpget2:
-#	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1</host><mode>1</mode><username>ftp_remote</username><password>225166</password><remotepath>idcdata/surfdata</remotepath><localpath>/idcdata/surfdata</localpath><matchname>SURF_ZH*.XML,SURF_ZH*.CSV</matchname>"
-	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1</host><mode>1</mode><username>alex</username><password>225166</password><remotepath>/tmp/idc/surfdata</remotepath><localpath>/idcdata/surfdata</localpath><matchname>SURF_ZH*.XML,SURF_ZH*.CSV</matchname><ptype>2</ptype><remotepathbak>/tmp/idc/surfdatabak</remotepathbak>"
-runftpget1:
-	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1</host><mode>1</mode><username>alex</username><password>225166</password><remotepath>/tmp/idc/surfdata</remotepath><localpath>/idcdata/surfdata</localpath><matchname>SURF_ZH*.XML,SURF_ZH*.CSV</matchname><ptype>1</ptype><remotepathbak>/tmp/idc/surfdatabak</remotepathbak>"
-runftpget3:
-	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1</host><mode>1</mode><username>alex</username><password>225166</password><remotepath>/tmp/idc/surfdata</remotepath><localpath>/idcdata/surfdata</localpath><matchname>SURF_ZH*.XML,SURF_ZH*.CSV</matchname><ptype>3</ptype><remotepathbak>/tmp/idc/surfdatabak</remotepathbak>"
+cleanftplocal:
+	rm -rf /idcdata/surfdata/*
+
+runftpget:
+	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1</host><mode>1</mode><username>ftp_remote</username><password>225166</password><remotepath>/tmp/idc/surfdata</remotepath><localpath>/idcdata/surfdata</localpath><matchname>*JSON</matchname><ptype>1</ptype><okfilename>/idcdata/ftplist/ftpgetfiles_test.xml</okfilename><checkmtime>true</checkmtime>"
 catftpgetlog:
 	cat /log/idc/ftpgetfiles_surfdata.log
-
-runprocctl:
-	/project/tools/bin/procctl 60 /project/idc/bin/crtsurfdata /project/idc/ini/stcode.ini /tmp/idc/surfdata /log/idc/crtsurfdata.log csv,xml,json
-runcheckproc:
-	/project/tools/bin/procctl 10 /project/tools/bin/checkproc /tmp/log/checkproc.log
-catchecklog:
-	cat /tmp/log/checkproc.log
-runchecktmp:
-	/project/tools/bin/checkproc /tmp/log/checkproc.log
-runserver_test:
-	/project/tools/bin/server_test
-runcheckproc_test_demo:
-	/project/tools/bin/checkproc_test_demo 100 10
-runcheckproc_test_demo_timeout:
-	/project/tools/bin/checkproc_test_demo 10 100
-runcheckproc_test_demo_timeout2:
-	/project/tools/bin/checkproc_test_demo2 10 1000
+cleanftpgetlog:
+	rm -rf /log/idc/ftpgetfiles_surfdata.log
