@@ -17,7 +17,7 @@ TabWidth: 2
 UseTab: Never
 ColumnLimit: 100
 
-MaxEmptyLinesToKeep: 1
+MaxEmptyLinesToKeep: 2
 
 
 # ============================================================

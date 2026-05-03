@@ -4,7 +4,9 @@ using namespace idc;
 
 cftpclient ftp_client;
 clogfile log_file;
+cpactive pactive;
 
+// TODO:数据结构1: 参数结构体
 struct st_arg {
   char host[31];
   int mode;
@@ -17,8 +19,11 @@ struct st_arg {
   char remotepathbak[256];
   char okfilename[256]; // 已下载成功文件名清单，此参数只有当ptype=1时才有效。
   bool checkmtime;      // 是否需要检查服务端文件时间
+  int timeout;          // 进程心跳超时时间
+  char pname[51];       // 进程名，ftpgetfiles_
 } starg;
 
+// TODO:数据结构2: 文件结构体
 struct st_file_info {
   string file_name_;
   string file_time_;
@@ -32,30 +37,37 @@ struct st_file_info {
   }
 };
 
+// TODO:数据结构3: 四个容器
 map<string, string> mfromok;          // 已下载成功文件的文件名和时间的map容器
 list<struct st_file_info> vfromnlist; // 从ftp服务器上获取到的文件名和时间的list容器
 list<struct st_file_info> vtook;      // 本次不需要下载
 list<struct st_file_info> vdownload;  // 本次需要下载
 
+
 bool loadokfile();
 bool load_list_file();
+bool compmap();
+bool writetookfile();
+bool appendtookfile(const struct st_file_info& stfileinfo);
 
 void app_exit(const int sig);
 void app_help();
 bool xml_to_arg(const char* strxmlbuffer);
+
 
 int main(int argc, char* argv[]) {
   if (argc != 3) {
     app_help();
     return -1;
   }
-
   // closeioandsignal(true);
   signal(SIGINT, app_exit);
   signal(SIGTERM, app_exit);
 
-  // TODO: 1-从服务器中的目录下载文件，可指定文件名匹配规则
-  // TODO: 1.1-打开日志文件，解析xml文件得到程序运行参数
+  ///////////////////////////////////////////////////////////////////
+  // TODO1:解析XML参数到starg结构体中, 编写xml_to_arg()实现
+  ///////////////////////////////////////////////////////////////////
+
   if (log_file.open(argv[1]) == false) {
     printf("打开日志文件失败，程序退出。\n");
     return -1;
@@ -64,8 +76,15 @@ int main(int argc, char* argv[]) {
     printf("解析xml参数失败，程序退出。\n");
     return -1;
   }
+  // 写入进程心跳
+  pactive.addpinfo(starg.timeout, starg.pname);
 
-  // TODO: 1.2-连接ftp服务器，进入指定目录,ftp_client.nlist()列出文件名并保存到本地文件中，然后将这些文件名放到vfromnlist容器中
+
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  // TODO2:连接FTP进入指定目录，nlist()列出远程文件,保存到vfromlist容器中
+  // 由ftp_client.login(), ftp_client.chdir(), ftp_client.nlist()和编写load_list_file()实现
+  //////////////////////////////////////////////////////////////////////////////////////////////
+
   // 登入ftp服务器
   if (ftp_client.login(starg.host, starg.username, starg.password, starg.mode) == false) {
     log_file.write(
@@ -93,6 +112,8 @@ int main(int argc, char* argv[]) {
   log_file.write(
     "ftp_client.nlist(%s) success.\n", sformat("/tmp/nlist/ftpgetfiles_%d.nlist", getpid()).c_str()
   );
+  // nlist后update心跳
+  pactive.uptatime();
 
   // 将获取到的文件名加载到vfromnlist容器中
   if (load_list_file() == false) {
@@ -100,43 +121,59 @@ int main(int argc, char* argv[]) {
     return -1;
   }
 
-  // TODO: 增量下载2
+
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  // TODO3:下载方式, 哪些文件需要下载, 增量or全量？
+  // type=1增量下载, 处理四个容器,编写loadokfile(), compmap()和writetookfile()实现
+  // - loadokfile(): 加载okfilename到mfromok容器
+  // - compmap():比较vfromnlist,mfromok等到vtook和vdownload
+  // - writetookfile():将vtook写入okfilename文件中,覆盖原来的旧内容
+  //////////////////////////////////////////////////////////////////////////////////////////////
+
   if (starg.ptype == 1) {
-    // 加载okfilename到mfromok容器
     loadokfile();
-    // 比较vfromnlist,mfromok等到vtook和vdownload
-
-    // 将vtook写入okfilename文件中,覆盖原来的旧内容
+    compmap();
+    writetookfile();
+  } else {
+    vfromnlist.swap(vdownload);
   }
+  // 可以更新心跳
+  pactive.uptatime();
 
-  // TODO: 1.3-遍历容器，使用ftp_client.get()函数下载文件
+
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  // TODO4:下载文件, 遍历vdownload容器使用ftp_client.get()下载
+  //////////////////////////////////////////////////////////////////////////////////////////////
   string str_remote_file_name;
   string str_local_file_name;
 
-  for (auto& i : vfromnlist) {
+  for (auto& i : vdownload) {
     // 拼接server/local全路径的文件名
     sformat(str_remote_file_name, "%s/%s", starg.remotepath, i.file_name_.c_str());
     // sformat(str_remote_file_name, "%s", i.file_name_.c_str());
     sformat(str_local_file_name, "%s/%s", starg.localpath, i.file_name_.c_str());
-
     log_file.write("Getting %s...\n", str_remote_file_name.c_str());
 
-    if (ftp_client.get(str_remote_file_name, str_local_file_name) == false) {
+    if (ftp_client.get(str_remote_file_name, str_local_file_name, starg.checkmtime) == false) {
       log_file << "ftp_client.get files failed.\n" << ftp_client.response() << "\n";
       return -1;
     }
-
     // << 追加日志
     log_file << "ftp_client.get files success.\n";
+    // 下载文件之后更新心跳
+    pactive.uptatime();
 
-    // TODO:2 -下载成功后，按照参数要求处理ftp服务器上的文件
-    // ptype=1 增量下载
 
-    // main ptype=1的增量处理
-    // if (starg.ptype == 1) {
-    // }
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // TODO5:下载成功后，按照参数要求处理ftp服务器上的文件
+    //////////////////////////////////////////////////////////////////////////////////////////////
 
-    // ptype=2 删除ftp服务端文件, ptype=3 ftp服务端相应文件移至备份
+    // ptype=1 增量下载, 将下载成功的文件追加到okfilename文件中
+    if (starg.ptype == 1) {
+      appendtookfile(i);
+    }
+
+    // ptype=2 删除ftp服务端文件
     if (starg.ptype == 2) {
       if (ftp_client.ftpdelete(str_remote_file_name) == false) {
         log_file.write(
@@ -148,6 +185,7 @@ int main(int argc, char* argv[]) {
       }
     }
 
+    // ptype=3 ftp服务端相应文件移至备份
     if (starg.ptype == 3) {
       string str_remote_file_name_bak = sformat("%s/%s", starg.remotepathbak, i.file_name_.c_str());
       if (ftp_client.ftprename(str_remote_file_name, str_remote_file_name_bak) == false) {
@@ -165,7 +203,73 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-// 函数实现
+
+bool appendtookfile(const struct st_file_info& stfileinfo) {
+  cofile ofile;
+
+  // 第二个参数为false不生成临时文件
+  if (ofile.open(starg.okfilename, false, ios::app) == false) {
+    log_file.write("ofile.open(%s) failed.\n", starg.okfilename);
+    return false;
+  }
+  ofile.writeline(
+    "<filename>%s</filename><mtime>%s</mtime>\n",
+    stfileinfo.file_name_.c_str(),
+    stfileinfo.file_time_.c_str()
+  );
+
+  return true;
+}
+
+
+bool writetookfile() {
+  cofile ofile;
+  if (ofile.open(starg.okfilename) == false) {
+    log_file.write("ofile.open(%s) failed.\n", starg.okfilename);
+    return false;
+  }
+
+  for (auto& i : vtook) {
+    ofile.writeline(
+      "<filename>%s</filename><mtime>%s</mtime>\n", i.file_name_.c_str(), i.file_time_.c_str()
+    );
+  }
+  ofile.closeandrename();
+
+  return true;
+}
+
+
+bool compmap() {
+  vtook.clear();
+  vdownload.clear();
+
+  for (auto& i : vfromnlist) {
+    // 使用文件名查找
+    auto it = mfromok.find(i.file_name_);
+    if (it != mfromok.end()) {
+      // 如果文件名存在，比较时间
+      if (starg.checkmtime == true) {
+        if (i.file_time_ == it->second) {
+          // 如果时间也相同，说明文件没有更新，不需要下载
+          vtook.push_back(i);
+        } else {
+          // 如果时间不同，说明文件有更新，需要下载
+          vdownload.push_back(i);
+        }
+      } else {
+        // 如果不需要检查时间，说明文件已经下载成功过了，不需要下载
+        vtook.push_back(i);
+      }
+    } else {
+      // 如果文件名不存在，说明是新文件，需要下载
+      vdownload.push_back(i);
+    }
+  }
+
+  return true;
+}
+
 
 bool loadokfile() {
   if (starg.ptype != 1) {
@@ -196,6 +300,7 @@ bool loadokfile() {
 
   return true;
 }
+
 
 bool load_list_file() {
   vfromnlist.clear();
@@ -235,6 +340,7 @@ bool load_list_file() {
 
   return true;
 }
+
 
 bool xml_to_arg(const char* strxmlbuffer) {
   memset(&starg, 0, sizeof(st_arg));
@@ -296,7 +402,7 @@ bool xml_to_arg(const char* strxmlbuffer) {
     }
   }
 
-  // TODO: 增量下载1-将已下载成功文件的文件名和时间保存到本地文件中，此参数只有当ptype=1时才有效。
+  // 将已下载成功文件的文件名和时间保存到本地文件中，此参数只有当ptype=1时才有效。
   if (starg.ptype == 1) {
     getxmlbuffer(strxmlbuffer, "okfilename", starg.okfilename, 255);
     if (strlen(starg.okfilename) == 0) {
@@ -307,8 +413,22 @@ bool xml_to_arg(const char* strxmlbuffer) {
     getxmlbuffer(strxmlbuffer, "checkmtime", starg.checkmtime);
   }
 
+  // 进程心跳超时时间与进程名
+  getxmlbuffer(strxmlbuffer, "timeout", starg.timeout);
+  if (starg.timeout == 0) {
+    log_file.write("timeout is null.\n");
+    return false;
+  }
+  getxmlbuffer(strxmlbuffer, "pname", starg.pname, 50);
+  // 进程名可选参数
+  // if (strlen(starg.pname) == 0) {
+  //   log_file.write("pname is null.\n");
+  //   return false;
+  // }
+
   return true;
 }
+
 
 void app_help() {
   printf("\n");
@@ -322,6 +442,7 @@ void app_help() {
     "<matchname>*.TXT</matchname>"
     "<ptype>1</ptype><okfilename>/idcdata/ftplist/ftpgetfiles_test.xml</okfilename>"
     "<checkmtime>true</checkmtime>"
+    "<timeout>30</timeout><pname>ftpgetfiles_test</pname>"
     "<timeout>30</timeout><pname>ftpgetfiles_test</pname>\"\n\n\n"
   );
 
@@ -360,6 +481,7 @@ void app_help() {
     "进程名，尽可能采用易懂的、与其它进程不同的名称，方便故障排查。\n\n\n"
   );
 }
+
 
 void app_exit(const int sig) {
   printf("程序退出，sig=%d\n", sig);
