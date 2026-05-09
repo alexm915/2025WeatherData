@@ -56,7 +56,7 @@ cleanftplocal:
 	rm -rf /idcdata/surfdata/*
 
 runftpget:
-	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1</host><mode>1</mode><username>ftp_remote</username><password>225166</password><remotepath>/tmp/idc/surfdata</remotepath><localpath>/idcdata/surfdata</localpath><matchname>*JSON</matchname><ptype>1</ptype><okfilename>/idcdata/ftplist/ftpgetfiles_test.xml</okfilename><checkmtime>true</checkmtime>"
+	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1:21</host><mode>1</mode><username>ftp_remote</username><password>225166</password><remotepath>/idcdata/ftp_server</remotepath><localpath>/idcdata/ftp_local</localpath><matchname>*.md</matchname><ptype>1</ptype><okfilename>/idcdata/ftpnlist/ftpgetfiles_test.xml</okfilename><checkmtime>false</checkmtime><timeout>30</timeout><pname>ftpgetfiles_test</pname>"
 catftpgetlog:
 	cat /log/idc/ftpgetfiles_surfdata.log
 cleanftpgetlog:

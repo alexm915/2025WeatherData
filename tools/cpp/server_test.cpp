@@ -1,17 +1,19 @@
 /**
  * @file server_test.cpp
- * @author Alexandr Mak (alxndrmak@google.com)
+ * @author Alex Mak (aliasgmail@duck.com)
  * @brief {进程的心跳}
  * @version 0.1
- * @date 2026-04-02
+ * @date 2026-05-09
  *
  * @copyright Copyright (c) 2026
  *
  */
 
+
+#include <iostream>
+
 #include <_public.h>
 #include <cstdlib>
-#include <iostream>
 using namespace idc;
 
 struct st_ProgramInfo {
@@ -21,7 +23,7 @@ struct st_ProgramInfo {
   time_t last_time;
 };
 int shared_memory_id = -1;
-st_ProgramInfo *shared_memory_ptr = nullptr;
+st_ProgramInfo* shared_memory_ptr = nullptr;
 int memory_index = -1; // 当前进程在共享内存数组中的索引下标
 
 void app_exit(const int sig) {
@@ -43,15 +45,13 @@ int main() {
   signal(SIGTERM, app_exit);
 
   // TODO：2-创建共享内存
-  shared_memory_id =
-      shmget(0x5095, 1000 * sizeof(st_ProgramInfo), 0666 | IPC_CREAT);
+  shared_memory_id = shmget(0x5095, 1000 * sizeof(st_ProgramInfo), 0666 | IPC_CREAT);
   if (shared_memory_id == -1) {
     printf("get shared memory failed.\n");
     return -1;
   }
   // TODO：3-将共享内存连接到当前进程的地址空间
-  shared_memory_ptr =
-      reinterpret_cast<st_ProgramInfo *>(shmat(shared_memory_id, nullptr, 0));
+  shared_memory_ptr = reinterpret_cast<st_ProgramInfo*>(shmat(shared_memory_id, nullptr, 0));
   // TODO：4-将当前进程信息写入结构体
   st_ProgramInfo program_info;
   memset(&program_info, 0, sizeof(program_info));
