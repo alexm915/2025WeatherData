@@ -1,13 +1,13 @@
-/** * @file ftpgetfiles.cpp
+/**
+ * @file ftpgetfiles.cpp
  * @author Alex Mak (aliasgmail@duck.com)
  * @brief {ftp文件传输模块: 把远程ftp服务端的文件下载到本地目录}
  * @version 0.1
- * @date 2026-05-09
+ * @date 2026-05-10
  *
  * @copyright Copyright (c) 2026
  *
  */
-
 
 #include "_ftp.h"
 #include "_public.h"
@@ -463,7 +463,8 @@ void app_help() {
     "<username>ftp_remote</username><password>225166</password>"
     "<remotepath>/idcdata/ftp_server</remotepath><localpath>/idcdata/ftp_local</localpath>"
     "<matchname>*.json</matchname>"
-    "<ptype>1</ptype><okfilename>/idcdata/ftplist/ftpgetfiles_test.xml</okfilename>"
+    "<ptype>1</ptype><localpathbak>/tmp/idc/surfdatabak</localpathbak>"
+    "<okfilename>/idcdata/ftplist/ftpgetfiles_test.xml</okfilename>"
     "<checkmtime>true</checkmtime>"
     "<timeout>30</timeout><pname>ftpgetfiles_test</pname>\"\n\n\n"
   );

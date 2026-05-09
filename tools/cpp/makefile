@@ -10,7 +10,7 @@ CFLAGS = -g
 #CFLAGS = -O2
 
 
-all:procctl checkproc deletefiles gzipfiles server_test checkproc_test_demo checkproc_test_demo2 ftpgetfiles
+all:procctl checkproc deletefiles gzipfiles ftpgetfiles ftpputfiles	
 
 procctl:procctl.cpp
 	g++ procctl.cpp -o procctl
@@ -29,16 +29,9 @@ ftpgetfiles:ftpgetfiles.cpp
 # -no-pie选项是为了生成一个非位置无关的可执行文件，兼容传统PIE可执行文件
 	g++ $(CFLAGS) -g ftpgetfiles.cpp -no-pie -o ftpgetfiles $(PUBLICL) $(PUBCPP) /project/public/libftp.a /project/public/_ftp.cpp
 	mv -f ftpgetfiles ../bin/.
-
-server_test:server_test.cpp
-	g++ $(CFLAGS) server_test.cpp -o server_test $(PUBLICL) $(PUBCPP)
-	mv -f server_test ../bin/.
-checkproc_test_demo:checkproc_test_demo.cpp
-	g++ $(CFLAGS) checkproc_test_demo.cpp -o checkproc_test_demo $(PUBLICL) $(PUBCPP)
-	mv -f checkproc_test_demo ../bin/.
-checkproc_test_demo2:checkproc_test_demo2.cpp
-	g++ $(CFLAGS) checkproc_test_demo2.cpp -o checkproc_test_demo2 $(PUBLICL) $(PUBCPP)
-	mv -f checkproc_test_demo2 ../bin/.
+ftpputfiles:ftpputfiles.cpp
+	g++ $(CFLAGS) -g ftpputfiles.cpp -no-pie -o ftpputfiles $(PUBLICL) $(PUBCPP) /project/public/libftp.a /project/public/_ftp.cpp
+	mv -f ftpputfiles ../bin/.
 
 clean:
 	rm -rf ../bin/*
@@ -52,12 +45,13 @@ runstart:
 	/project/idc/cpp/start.sh
 runstop:
 	/project/idc/cpp/stop.sh
-cleanftplocal:
-	rm -rf /idcdata/surfdata/*
 
-runftpget:
-	/project/tools/bin/ftpgetfiles /log/idc/ftpgetfiles_surfdata.log "<host>127.0.0.1:21</host><mode>1</mode><username>ftp_remote</username><password>225166</password><remotepath>/idcdata/ftp_server</remotepath><localpath>/idcdata/ftp_local</localpath><matchname>*.md</matchname><ptype>1</ptype><okfilename>/idcdata/ftpnlist/ftpgetfiles_test.xml</okfilename><checkmtime>false</checkmtime><timeout>30</timeout><pname>ftpgetfiles_test</pname>"
-catftpgetlog:
+catputlog:
+	cat /log/idc/ftpputfiles_surfdata.log
+catgetlog:
 	cat /log/idc/ftpgetfiles_surfdata.log
-cleanftpgetlog:
+cleanftplog:
+	rm -rf /log/idc/ftpputfiles_surfdata.log
 	rm -rf /log/idc/ftpgetfiles_surfdata.log
+cleansurfdata:
+	rm -rf /tmp/idc/surfdata
