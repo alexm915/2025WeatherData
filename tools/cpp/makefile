@@ -10,7 +10,7 @@ CFLAGS = -g
 #CFLAGS = -O2
 
 
-all:procctl checkproc deletefiles gzipfiles ftpgetfiles ftpputfiles	
+all:procctl checkproc deletefiles gzipfiles ftpgetfiles ftpputfiles fileserver tcpputfiles	
 
 procctl:procctl.cpp
 	g++ procctl.cpp -o procctl
@@ -33,6 +33,15 @@ ftpputfiles:ftpputfiles.cpp
 	g++ $(CFLAGS) -g ftpputfiles.cpp -no-pie -o ftpputfiles $(PUBLICL) $(PUBCPP) /project/public/libftp.a /project/public/_ftp.cpp
 	mv -f ftpputfiles ../bin/.
 
+tcp:tcpputfiles fileserver
+fileserver:fileserver.cpp
+	g++ $(CFLAGS) fileserver.cpp -no-pie -o fileserver $(PUBLICL) $(PUBCPP) /project/public/libftp.a /project/public/_ftp.cpp
+	mv -f fileserver ../bin/.
+tcpputfiles:tcpputfiles.cpp
+	g++ $(CFLAGS) -g tcpputfiles.cpp -no-pie -o tcpputfiles $(PUBLICL) $(PUBCPP) /project/public/libftp.a /project/public/_ftp.cpp
+	mv -f tcpputfiles ../bin/.
+
+
 clean:
 	rm -rf ../bin/*
 #	rm -rf /tmp/log/checkproc.log
@@ -46,12 +55,15 @@ runstart:
 runstop:
 	/project/idc/cpp/stop.sh
 
-catputlog:
-	cat /log/idc/ftpputfiles_surfdata.log
-catgetlog:
-	cat /log/idc/ftpgetfiles_surfdata.log
-cleanftplog:
-	rm -rf /log/idc/ftpputfiles_surfdata.log
-	rm -rf /log/idc/ftpgetfiles_surfdata.log
-cleansurfdata:
-	rm -rf /tmp/idc/surfdata
+catput:
+	cat /log/idc/tcpputfiles_surfdata.log
+catget:
+	cat /log/idc/tcpgetfiles_surfdata.log
+catserver:
+	cat /log/idc/fileserver.log
+cleantcp:
+	rm -rf /project/tools/bin/tcpputfiles
+	rm -rf /project/tools/bin/fileserver
+	rm -rf /log/idc/tcpputfiles_surfdata.log
+	rm -rf /log/idc/tcpgetfiles_surfdata.log
+	rm -rf /log/idc/fileserver.log
