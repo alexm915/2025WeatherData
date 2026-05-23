@@ -17,7 +17,7 @@ struct st_stcode {
 // 存放气象站点参数的容器
 list<struct st_stcode> stlist;
 // 将站点参数存放到stlist容器中的函数
-bool loadstcode(const string &inifile);
+bool loadstcode(const string& inifile);
 
 // 观测数据的结构体
 struct st_surfdata {
@@ -41,7 +41,7 @@ list<struct st_surfdata> datalist;
 void crtsurfdata();
 
 // 把datalist容器中的观测数据写入成csv,xml,json三种格式的文件的函数
-bool crtsurffile(const string &outpath, const string &datafmt);
+bool crtsurffile(const string& outpath, const string& datafmt);
 
 // 进程心跳
 cpactive pactive;
@@ -51,7 +51,7 @@ cpactive pactive;
     1) 程序需要三个参数：站点参数文件stcode.ini, 生成数据的放置目录, 日志文件,
   输出数据文件的格式
 */
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   if (argc != 5) {
     cout << "Using:./crtsurfdata inifile outpath logfile datafmt\n";
     cout << "Examples:/project/tools/bin/procctl 60 "
@@ -145,7 +145,7 @@ void app_exit(int sig) {
   // 此处\n\n，后一个\n是插入空白行, 使日志文件更清晰。
   exit(0);
 }
-bool loadstcode(const string &inifile) {
+bool loadstcode(const string& inifile) {
   cifile ifile;
   if (ifile.open(inifile) == false) {
     logfile.write("ifile.open(%s) failed.\n", inifile.c_str());
@@ -196,7 +196,7 @@ void crtsurfdata() {
   srand(time(0)); // 设置随机数种子
   st_surfdata stsurfdata;
 
-  for (auto &stcode : stlist) {
+  for (auto& stcode : stlist) {
     memset(&stsurfdata, 0, sizeof(st_surfdata));
     // 填充stsurfdata结构体
     strcpy(stsurfdata.obtid, stcode.obtid);
@@ -223,10 +223,10 @@ void crtsurfdata() {
   // }
 }
 
-bool crtsurffile(const string &outpath, const string &datafmt) {
+bool crtsurffile(const string& outpath, const string& datafmt) {
   // 拼接文件名，如：/tmp/idc/surfdata/SURF_ZH_20260221092200_2254.csv
-  string strfilename = outpath + "/SURF_ZH_" + strddatetime + "_" +
-                       to_string(getpid()) + "." + datafmt;
+  string strfilename =
+    outpath + "/SURF_ZH_" + strddatetime + "_" + to_string(getpid()) + "." + datafmt;
 
   cofile ofile; // 写入数据文件的对象
   if (ofile.open(strfilename) == false) {
@@ -236,8 +236,7 @@ bool crtsurffile(const string &outpath, const string &datafmt) {
 
   // 将datalist容器中的观测数据写入成csv,xml,json三种格式的文件
   if (datafmt == "csv")
-    ofile.writeline(
-        "站点代码,数据时间,气温,气压,相对湿度,风向,风速,降雨量,能见度\n");
+    ofile.writeline("站点代码,数据时间,气温,气压,相对湿度,风向,风速,降雨量,能见度\n");
 
   // 写入xml开始标签
   if (datafmt == "xml")
@@ -245,26 +244,51 @@ bool crtsurffile(const string &outpath, const string &datafmt) {
   if (datafmt == "json")
     ofile.writeline("{\"data\":[\n");
 
-  for (auto &aa : datalist) {
+  for (auto& aa : datalist) {
     if (datafmt == "csv") {
-      ofile.writeline("%s,%s,%.1f,%.1f,%d,%d,%.1f,%.1f,%.1f\n", aa.obtid,
-                      aa.ddatetime, aa.t / 10.0, aa.p / 10.0, aa.u, aa.wd,
-                      aa.wf / 10.0, aa.r / 10.0, aa.vis / 10.0);
+      ofile.writeline(
+        "%s,%s,%.1f,%.1f,%d,%d,%.1f,%.1f,%.1f\n",
+        aa.obtid,
+        aa.ddatetime,
+        aa.t / 10.0,
+        aa.p / 10.0,
+        aa.u,
+        aa.wd,
+        aa.wf / 10.0,
+        aa.r / 10.0,
+        aa.vis / 10.0
+      );
     }
     if (datafmt == "xml") {
       ofile.writeline(
-          "<obtid>%s</obtid><ddatetime>%s</ddatetime><t>%.1f</t><p>%.1f</"
-          "p><u>%d</u><wd>%d</wd><wf>%.1f</wf><r>%.1f</r><vis>%.1f</vis><endl/"
-          ">\n",
-          aa.obtid, aa.ddatetime, aa.t / 10.0, aa.p / 10.0, aa.u, aa.wd,
-          aa.wf / 10.0, aa.r / 10.0, aa.vis / 10.0);
+        "<obtid>%s</obtid><ddatetime>%s</ddatetime><t>%.1f</t><p>%.1f</"
+        "p><u>%d</u><wd>%d</wd><wf>%.1f</wf><r>%.1f</r><vis>%.1f</vis><endl/"
+        ">\n",
+        aa.obtid,
+        aa.ddatetime,
+        aa.t / 10.0,
+        aa.p / 10.0,
+        aa.u,
+        aa.wd,
+        aa.wf / 10.0,
+        aa.r / 10.0,
+        aa.vis / 10.0
+      );
     }
     if (datafmt == "json") {
       ofile.writeline(
-          "{\"obtid\":\"%s\",\"ddatetime\":\"%s\",\"t\":%.1f,\"p\":%.1f,"
-          "\"u\":%d,\"wd\":%d,\"wf\":%.1f,\"r\":%.1f,\"vis\":%.1f}",
-          aa.obtid, aa.ddatetime, aa.t / 10.0, aa.p / 10.0, aa.u, aa.wd,
-          aa.wf / 10.0, aa.r / 10.0, aa.vis / 10.0);
+        "{\"obtid\":\"%s\",\"ddatetime\":\"%s\",\"t\":%.1f,\"p\":%.1f,"
+        "\"u\":%d,\"wd\":%d,\"wf\":%.1f,\"r\":%.1f,\"vis\":%.1f}",
+        aa.obtid,
+        aa.ddatetime,
+        aa.t / 10.0,
+        aa.p / 10.0,
+        aa.u,
+        aa.wd,
+        aa.wf / 10.0,
+        aa.r / 10.0,
+        aa.vis / 10.0
+      );
 
       // json格式的文件最后一个记录后面不能有逗号，所以在写入最后一个记录时，需要去掉逗号
       static int ii = 0;
@@ -287,8 +311,9 @@ bool crtsurffile(const string &outpath, const string &datafmt) {
 
   ofile.closeandrename();
 
-  logfile.write("生成数据文件%s成功,数据时间%s,记录数%d.\n",
-                strfilename.c_str(), strddatetime, datalist.size());
+  logfile.write(
+    "生成数据文件%s成功,数据时间%s,记录数%d.\n", strfilename.c_str(), strddatetime, datalist.size()
+  );
 
   return true;
 }
