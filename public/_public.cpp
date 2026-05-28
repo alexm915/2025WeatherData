@@ -855,6 +855,11 @@ bool cifile::readline(string& buf, const string& endbz) {
   while (true) {
     getline(fin, strline); // 从文件中读取一行。
 
+    // 修复 Bug：当文件最后一行没有换行符时，eof() 为 true 会导致丢弃最后一行。
+    // 应当使用 fail() 来判断是否未读取到任何数据或发生了读取错误。
+    // if (fin.fail())
+    //   break; // 如果文件已读完。
+
     if (fin.eof())
       break; // 如果文件已读完。
 

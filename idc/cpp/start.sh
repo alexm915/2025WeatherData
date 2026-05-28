@@ -33,12 +33,23 @@
 ##########       tcp文件传输
 ##############################################################################
 # 文件传输的服务端程序。
-/project/tools/bin/procctl 10 /project/tools/bin/fileserver 5005 /log/idc/fileserver.log
+#/project/tools/bin/procctl 10 /project/tools/bin/fileserver 5005 /log/idc/fileserver.log
 
 # 把目录/tmp/ftpputest中的文件上传到/tmp/tcpputest目录中。
-/project/tools/bin/procctl 20 /project/tools/bin/tcpputfiles /log/idc/tcpputfiles_surfdata.log "<ip>127.0.0.1</ip><port>5005</port><ptype>1</ptype><clientpath>/tmp/ftpputest</clientpath><andchild>true</andchild><matchname>*.XML,*.CSV,*.JSON</matchname><srvpath>/tmp/tcpputest</srvpath><timetvl>10</timetvl><timeout>50</timeout><pname>tcpputfiles_surfdata</pname>"
+#/project/tools/bin/procctl 20 /project/tools/bin/tcpputfiles /log/idc/tcpputfiles_surfdata.log "<ip>127.0.0.1</ip><port>5005</port><ptype>1</ptype><clientpath>/tmp/ftpputest</clientpath><andchild>true</andchild><matchname>*.XML,*.CSV,*.JSON</matchname><srvpath>/tmp/tcpputest</srvpath><timetvl>10</timetvl><timeout>50</timeout><pname>tcpputfiles_surfdata</pname>"
 # 把目录/tmp/tcpputest中的文件下载到/tmp/tcpgetest目录中。
-/project/tools/bin/procctl 20 /project/tools/bin/tcpgetfiles /log/idc/tcpgetfiles_surfdata.log "<ip>127.0.0.1</ip><port>5005</port><ptype>1</ptype><srvpath>/tmp/tcpputest</srvpath><andchild>true</andchild><matchname>*.XML,*.CSV,*.JSON</matchname><clientpath>/tmp/tcpgetest</clientpath><timetvl>10</timetvl><timeout>50</timeout><pname>tcpgetfiles_surfdata</pname>"
+#/project/tools/bin/procctl 20 /project/tools/bin/tcpgetfiles /log/idc/tcpgetfiles_surfdata.log "<ip>127.0.0.1</ip><port>5005</port><ptype>1</ptype><srvpath>/tmp/tcpputest</srvpath><andchild>true</andchild><matchname>*.XML,*.CSV,*.JSON</matchname><clientpath>/tmp/tcpgetest</clientpath><timetvl>10</timetvl><timeout>50</timeout><pname>tcpgetfiles_surfdata</pname>"
 
 # 清理/tmp/tcpgetest目录中的历史数据文件。
-/project/tools/bin/procctl 300 /project/tools/bin/deletefiles /tmp/tcpgetest "*" 0.02
+#/project/tools/bin/procctl 300 /project/tools/bin/deletefiles /tmp/tcpgetest "*" 0.02
+
+
+##############################################################################
+##########       站点参数、观测数据入库
+##############################################################################
+# 把站点参数数据入库到ZHOBTCODE表中，如果站点不存在则插入，站点已存在则更新。
+/project/tools/bin/procctl 120 /project/idc/bin/obtcodetodb /project/idc/ini/stcode.ini "idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM" "Simplified Chinese_China.AL32UTF8" /log/idc/obtcodetodb.log
+# 把/idcdata/surfdata目录中的气象观测数据文件入库到T_ZHOBTMIND表中。
+/project/tools/bin/procctl 10 /project/idc/bin/obtmindtodb /idcdata/surfdata "idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM" "Simplified Chinese_China.AL32UTF8" /log/idc/obtmindtodb.log
+# 执行/project/idc/sql/deletetable.sql脚本，删除T_ZHOBTMIND表两小时之前的数据，如果启用了数据清理程序deletetable，就不必启用这行脚本了。
+/project/tools/bin/procctl 120 /oracle/home/bin/sqlplus idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM @/project/idc/sql/deletetable.sql
