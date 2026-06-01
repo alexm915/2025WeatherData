@@ -39,7 +39,7 @@ BreakBeforeBraces: Attach
 # 4. Control & Function Layout
 # ============================================================
 
-AllowShortFunctionsOnASingleLine: None
+AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortEnumsOnASingleLine: false

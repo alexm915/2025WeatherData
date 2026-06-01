@@ -1,11 +1,13 @@
 #include "_public.h"
 using namespace idc;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   if (argc != 2) {
     printf("Using: this_program_name logfile_name\n");
-    printf("Example:/project/tools/bin/procctl 10 /project/tools/bin/checkproc "
-           "/tmp/log/checkproc.log\n");
+    printf(
+      "Example:/project/tools/bin/procctl 10 /project/tools/bin/checkproc "
+      "/tmp/log/checkproc.log\n"
+    );
     printf("本程序用于检查后台服务程序是否超时，如果已超时，就终止它。\n");
     printf("注意：\n");
     printf("  1）本程序由procctl启动，运行周期建议为10秒。\n");
@@ -27,15 +29,17 @@ int main(int argc, char *argv[]) {
   // TODO:
   // 2-获取共享内存,key为SHMKEYP,大小为MAXNUMP个st_procinfo结构体的大小，权限为0666
   int shmid = -1;
-  if ((shmid = shmget(static_cast<key_t>(SHMKEYP),
-                      MAXNUMP * sizeof(struct st_procinfo),
-                      0666 | IPC_CREAT)) == -1) {
+  if (
+    (shmid = shmget(
+       static_cast<key_t>(SHMKEYP), MAXNUMP * sizeof(struct st_procinfo), 0666 | IPC_CREAT
+     )) == -1
+  ) {
     log_file.write("创建共享内存失败（%s）。\n", SHMKEYP);
     return -1;
   }
 
   // TODO：3-连接共享内存到当前的进程地址空间
-  st_procinfo *shm = reinterpret_cast<st_procinfo *>(shmat(shmid, nullptr, 0));
+  st_procinfo* shm = reinterpret_cast<st_procinfo*>(shmat(shmid, nullptr, 0));
 
   // TODO: 4-遍历共享内存中的所有服务程序，检查它们是否超时，如果超时就终止它们
   for (int i = 0; i < MAXNUMP; i++) {
@@ -70,8 +74,7 @@ int main(int argc, char *argv[]) {
     }
 
     // 超时了，先显示日志
-    log_file.write("进程（%d）%s已超时\n", tmp_procinfo.pid,
-                   tmp_procinfo.pname);
+    log_file.write("进程（%d）%s已超时\n", tmp_procinfo.pid, tmp_procinfo.pname);
 
     /*
       TODO: 4.2-然后终止它
@@ -89,12 +92,10 @@ int main(int argc, char *argv[]) {
       }
     }
     if (iret == -1) {
-      log_file.write("进程（%d）%s已正常终止\n", tmp_procinfo.pid,
-                     tmp_procinfo.pname);
+      log_file.write("进程（%d）%s已正常终止\n", tmp_procinfo.pid, tmp_procinfo.pname);
     } else {
       kill(tmp_procinfo.pid, 9);
-      log_file.write("进程（%d）%s被强行终止\n", tmp_procinfo.pid,
-                     tmp_procinfo.pname);
+      log_file.write("进程（%d）%s被强行终止\n", tmp_procinfo.pid, tmp_procinfo.pname);
       memset(&shm[i], 0, sizeof(struct st_procinfo)); // 将进程残留信息清除
     }
   }

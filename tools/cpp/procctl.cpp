@@ -4,26 +4,33 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 
   // TODO: 1-程序使用提示
   if (argc < 3) {
 
     printf("Using:./procctl restart_time program argv ...\n");
-    printf("Example:/project/tools/bin/procctl 10 /usr/bin/tar zcvf "
-           "/tmp/tmp.tgz /usr/include\n");
-    printf("Example:/project/tools/bin/procctl 60 /project/idc/bin/crtsurfdata "
-           "/project/idc/ini/stcode.ini /tmp/idc/surfdata "
-           "/log/idc/crtsurfdata.log csv,xml,json\n");
+    printf(
+      "Example:/project/tools/bin/procctl 10 /usr/bin/tar zcvf "
+      "/tmp/tmp.tgz /usr/include\n"
+    );
+    printf(
+      "Example:/project/tools/bin/procctl 60 /project/idc/bin/crtsurfdata "
+      "/project/idc/ini/stcode.ini /tmp/idc/surfdata "
+      "/log/idc/crtsurfdata.log csv,xml,json\n"
+    );
 
     printf("本程序是服务程序的调度程序，周期性启动服务程序或shell脚本。\n");
     printf("restart_time 运行周期，单位：秒。\n");
-    printf("    "
-           "被调度的程序运行结束后，在restart_time秒后会被procctl重新启动。\n");
     printf(
-        "    如果被调度的程序是周期性的任务，restart_time设置为运行周期。\n");
-    printf("    "
-           "如果被调度的程序是常驻内存的服务程序，restart_time设置小于5秒。\n");
+      "    "
+      "被调度的程序运行结束后，在restart_time秒后会被procctl重新启动。\n"
+    );
+    printf("    如果被调度的程序是周期性的任务，restart_time设置为运行周期。\n");
+    printf(
+      "    "
+      "如果被调度的程序是常驻内存的服务程序，restart_time设置小于5秒。\n"
+    );
     printf("program 被调度的程序名，必须使用全路径。\n");
     printf("    被调度的程序的参数。\n");
     printf("注意，本程序不会被kill杀死，但可以用kill -9强行杀死。\n\n\n");
@@ -51,7 +58,7 @@ int main(int argc, char *argv[]) {
 
   // 为 execv 构造一套全新的、语义正确的参数数组
   // 程序参数: 本程序名 restart_time 调用的program argv ...
-  char *pargv[argc];
+  char* pargv[argc];
   for (int ii = 2; ii < argc; ii++) {
     pargv[ii - 2] = argv[ii];
   }

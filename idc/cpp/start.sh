@@ -53,3 +53,13 @@
 /project/tools/bin/procctl 10 /project/idc/bin/obtmindtodb /idcdata/surfdata "idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM" "Simplified Chinese_China.AL32UTF8" /log/idc/obtmindtodb.log
 # 执行/project/idc/sql/deletetable.sql脚本，删除T_ZHOBTMIND表两小时之前的数据，如果启用了数据清理程序deletetable，就不必启用这行脚本了。
 /project/tools/bin/procctl 120 /oracle/home/bin/sqlplus idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM @/project/idc/sql/deletetable.sql
+
+##############################################################################
+##########       数据抽取模块
+##############################################################################
+# 每隔1小时把T_ZHOBTCODE表中全部的数据抽取出来(全量抽取)。
+/project/tools/bin/procctl 3600 /project/tools/bin/dminingoracle /log/idc/dminingoracle_ZHOBTCODE.log "<connstr>idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM</connstr><charset>Simplified Chinese_China.AL32UTF8</charset><selectsql>select obtid,cityname,provname,lat,lon,height from T_ZHOBTCODE</selectsql><fieldstr>obtid,cityname,provname,lat,lon,height</fieldstr><fieldlen>10,30,30,10,10,10</fieldlen><bfilename>ZHOBTCODE</bfilename><efilename>toidc</efilename><outpath>/idcdata/dmindata</outpath><timeout>30</timeout><pname>dminingoracle_ZHOBTCODE</pname>"
+# 每30秒从T_ZHOBTMIND表中增量抽取数据。
+/project/tools/bin/procctl 30 /project/tools/bin/dminingoracle /log/idc/dminingoracle_ZHOBTMIND.log "<connstr>idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM</connstr><charset>Simplified Chinese_China.AL32UTF8</charset><selectsql>select obtid,to_char(ddatetime,'yyyymmddhh24miss'),t,p,u,wd,wf,r,vis,keyid from T_ZHOBTMIND where keyid>:1 and obtid like '5%%'</selectsql><fieldstr>obtid,ddatetime,t,p,u,wd,wf,r,vis,keyid</fieldstr><fieldlen>5,19,8,8,8,8,8,8,8,15</fieldlen><bfilename>ZHOBTMIND</bfilename><efilename>togxpt</efilename><outpath>/idcdata/dmindata</outpath><starttime></starttime><incfield>keyid</incfield><incfilename>/idcdata/dmining/dminingoracle_ZHOBTMIND_togxpt.keyid</incfilename><timeout>30</timeout><pname>dminingoracle_ZHOBTMIND_togxpt</pname><maxcount>1000</maxcount><connstr1>alex/Alex225166@//192.168.145.128:1521/XEPDB1</connstr1>"
+# 清理/idcdata/dmindata目录中文件，防止把空间撑满。
+/project/tools/bin/procctl 300 /project/tools/bin/deletefiles /idcdata/dmindata "*" 0.02

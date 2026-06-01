@@ -16,24 +16,31 @@ cpactive pactive;
 
 void app_exit(const int sig);
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   if (argc != 4) {
     printf("\n");
-    printf("Using: this_program_name delete_files_directory_path "
-           "file_matched_rule time_days_ago\n\n");
-    printf("Example:/project/tools/bin/deletefiles /tmp/idc/surfdata "
-           "\"*.xml,*.json\" 0.01\n");
-    cout
-        << R"(Example2:/project/tools/bin/deletefiles /log/idc "*.log.20*" 0.01)"
-        << endl;
-    printf("Example3:/project/tools/bin/procctl 300 "
-           "project/tools/bin/deletefiles /log/idc \"*.log20*\" 0.02\n\n");
     printf(
-        "Example4:/project/tools/bin/procctl 300 project/tools/bin/deletefiles "
-        "/tmp/idc/surfdata \"*.xml,*json\" 0.01\n\n");
+      "Using: this_program_name delete_files_directory_path "
+      "file_matched_rule time_days_ago\n\n"
+    );
+    printf(
+      "Example:/project/tools/bin/deletefiles /tmp/idc/surfdata "
+      "\"*.xml,*.json\" 0.01\n"
+    );
+    cout << R"(Example2:/project/tools/bin/deletefiles /log/idc "*.log.20*" 0.01)" << endl;
+    printf(
+      "Example3:/project/tools/bin/procctl 300 "
+      "project/tools/bin/deletefiles /log/idc \"*.log20*\" 0.02\n\n"
+    );
+    printf(
+      "Example4:/project/tools/bin/procctl 300 project/tools/bin/deletefiles "
+      "/tmp/idc/surfdata \"*.xml,*json\" 0.01\n\n"
+    );
     printf("这是一个工具程序，用来清理历史数据文件或日志文件。\n");
-    printf("本程序会把pathname目录及其子目录中timeout天之前，且符合matchstr条件"
-           "的文件删除掉，timeout可以是小数。\n");
+    printf(
+      "本程序会把pathname目录及其子目录中timeout天之前，且符合matchstr条件"
+      "的文件删除掉，timeout可以是小数。\n"
+    );
     printf("本程序不会写日志，也不会在terminal上输出任何信息。\n\n\n");
 
     return -1;
@@ -48,8 +55,7 @@ int main(int argc, char *argv[]) {
 
   // TODO:1-获取被定义为历史数据文件的时间点(多少天前的文件被定义为历史数据文件)
   // ltime1(fmt,offset), offset为0表当前时间，负数表过去，正数表未来
-  string strtimeout =
-      ltime1("yyyymmddhh24miss", 0 - (int)(atof(argv[3]) * 24 * 60 * 60));
+  string strtimeout = ltime1("yyyymmddhh24miss", 0 - (int)(atof(argv[3]) * 24 * 60 * 60));
 
   // TODO:2-打开目录
   cdir dir;
@@ -65,8 +71,7 @@ int main(int argc, char *argv[]) {
       if (remove(dir.m_ffilename.c_str()) == 0) {
         cout << "delete file " << dir.m_ffilename << " ok." << endl; // 调试代码
       } else {
-        cout << "delete file " << dir.m_ffilename << " failed."
-             << endl; // 调试代码
+        cout << "delete file " << dir.m_ffilename << " failed." << endl; // 调试代码
       }
     }
   }
