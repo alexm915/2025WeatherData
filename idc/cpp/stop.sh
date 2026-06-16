@@ -8,11 +8,12 @@ killall -9 procctl
 # 尝试让其他服务程序正常终止
 killall crtsurfdata deletefiles gzipfiles ftpgetfiles ftpputfiles
 killall fileserver tcpputfiles tcpgetfiles obtcodetodb obtmindtodb
-killall dminingoracle
+killall dminingoracle xmltodb
+
 #让其他服务程序有足够多的时间退出
 sleep 5
 
 # 不管其他服务程序是否正常退出，全部强制终止
 killall -9 crtsurfdata deletefiles gzipfiles ftpgetfiles ftpputfiles
 killall -9 fileserver tcpputfiles tcpgetfiles obtmindtodb
-killall -9 dminingoracle
+killall -9 dminingoracle xmltodb

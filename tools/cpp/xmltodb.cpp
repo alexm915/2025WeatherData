@@ -7,6 +7,8 @@ using namespace idc;
 
 clogfile logfile;
 connection conn;
+cpactive pactive;
+
 struct st_arg {
   char connstr[101];
   char charset[51];
@@ -66,11 +68,23 @@ int main(int argc, char* argv[]) {
   if (xml_to_arg(argv[2]) == false) {
     return -1;
   }
-
+  pactive.addpinfo(starg.timeout, starg.pname);
   _xmltodb();
 
   return 0;
 }
+
+
+bool xmltobakerr(const string& fullfilename, const string& srcpath, const string& dstpath) {
+  string dstfilename = fullfilename;
+  replacestr(dstfilename, srcpath, dstpath, false);
+  if (renamefile(fullfilename, dstfilename.c_str()) == false) {
+    logfile.write("renamefile(%s,%s) failed.\n", fullfilename.c_str(), dstfilename.c_str());
+  }
+
+  return true;
+}
+
 
 bool execsql() {
   if (strlen(stxmltotable.execute_sql) == 0) {
@@ -379,21 +393,33 @@ void split_value_buffer(const string& strbuffer) {
 
 
 bool _xmltodb() {
-  if (load_xml_to_table() == false) {
-    return false;
-  }
-  if (conn.connecttodb(starg.connstr, starg.charset) != 0) {
-    logfile.write("connect database(%s) failed.\n%s\n", starg.connstr, conn.message());
-    return false;
-  }
-  logfile.write("connect database(%s) ok.\n", starg.connstr);
   cdir dir;
+  int counter = 50; // 设定50是为了第一次进入循环时加载参数
   while (true) {
+    // 入库参数需要定时更新
+    if (counter > 30) {
+      if (load_xml_to_table() == false) {
+        return false;
+      }
+      counter = 0;
+    } else {
+      counter++;
+    }
     // 文件排序的目的是让先生成的文件先入库
     if (dir.opendir(starg.xmlpath, "*.xml", 10000, false, true) == false) {
       logfile.write("dir.open(%s) failed.\n", starg.xmlpath);
       return false;
     }
+
+    // 有数据需要入库时再连接数据库
+    if (conn.isopen() == false) {
+      if (conn.connecttodb(starg.connstr, starg.charset) != 0) {
+        logfile.write("connect database(%s) failed.\n%s\n", starg.connstr, conn.message());
+        return false;
+      }
+      logfile.write("connect database(%s) ok.\n", starg.connstr);
+    }
+
     while (true) {
       if (dir.readdir() == false) {
         break;
@@ -402,6 +428,9 @@ bool _xmltodb() {
 
       // 处理xml文件的子函数, return 0成功，其余都是失败
       int ret = _xmltodb(dir.m_ffilename, dir.m_filename);
+
+      pactive.uptatime();
+
       // 处理错误情况
       // 0-成功，没有错误。把已入库的xml文件移动到备份目录。
       if (ret == 0) {
@@ -414,12 +443,38 @@ bool _xmltodb() {
       }
 
       // 1-入库参数不正确；3-待入库的表不存在；4-执行入库前的SQL语句失败。把xml文件移动到错误目录。
+      if (ret == 1 || ret == 3 || ret == 4) {
+        if (ret == 1) {
+          logfile.write("%s", "入库参数不正确。\n");
+        }
+        if (ret == 3) {
+          logfile.write("%s", "待入库的表不存在。\n");
+        }
+        if (ret == 4) {
+          logfile.write("%s", "执行入库前的SQL语句失败。\n");
+        }
+        if (xmltobakerr(dir.m_ffilename, starg.xmlpath, starg.xmlpatherr) == false) {
+          return false;
+        }
+      }
       // 2-数据库错误，函数返回，程序将退出。
+      if (ret == 2) {
+        logfile.write("%s", "数据库错误。\n");
+        return false;
+      }
       // 5- 打开xml文件失败，函数返回，程序将退出。
+      if (ret == 5) {
+        logfile.write("%s", "打开xml文件失败。\n");
+        return false;
+      }
     }
-    break; // 测试用
-    sleep(starg.timetvl);
+    // 如果刚才处理了文件，表示不空闲，可能不断的有文件需要入库，就不sleep了。
+    if (dir.size() == 0) {
+      sleep(starg.timetvl);
+    }
   }
+
+  pactive.uptatime();
 
   return true;
 }
