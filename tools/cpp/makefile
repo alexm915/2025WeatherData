@@ -9,7 +9,7 @@ ORACPP = /project/public/db/oracle/_ooci.cpp
 CFLAGS = -g
 
 
-all:procctl checkproc deletefiles gzipfiles ftpgetfiles ftpputfiles fileserver tcpputfiles dminingoracle
+all:procctl checkproc deletefiles gzipfiles ftpgetfiles ftpputfiles fileserver tcpputfiles dminingoracle xmltodb
 
 procctl:procctl.cpp
 	g++ procctl.cpp -o procctl
@@ -40,6 +40,9 @@ tcpputfiles:tcpputfiles.cpp
 dminingoracle:dminingoracle.cpp
 	g++ $(CFLAGS) dminingoracle.cpp -o dminingoracle $(PUBINCL) $(PUBCPP) $(ORAINCL) $(ORALIB) $(ORALIBS) $(ORACPP)
 	mv -f dminingoracle ../bin/.
+xmltodb:xmltodb.cpp _tools.cpp
+	g++ $(CFLAGS) xmltodb.cpp _tools.cpp -g -o xmltodb $(PUBINCL) $(PUBCPP) $(ORAINCL) $(ORALIB) $(ORALIBS) $(ORACPP)
+	mv -f xmltodb ../bin/.
 
 clean:
 	rm -rf ../bin/*
@@ -66,23 +69,21 @@ cleantcp:
 	rm -rf /log/idc/tcpgetfiles_surfdata.log
 	rm -rf /log/idc/fileserver.log
 
-db:dminingoracle
-rundb:
-	/project/tools/bin/dminingoracle "/log/idc/dminingoracle_ZHOBTMIND.log" "<connstr>idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM</connstr><charset>Simplified Chinese_China.AL32UTF8</charset><selectsql>select obtid,to_char(ddatetime,'yyyymmddhh24miss'),t,p,u,wd,wf,r,vis,keyid from T_ZHOBTMIND where keyid>:1 and obtid like '5%'</selectsql><fieldstr>obtid,ddatetime,t,p,u,wd,wf,r,vis,keyid</fieldstr><fieldlen>5,19,8,8,8,8,8,8,8,15</fieldlen><bfilename>ZHOBTMIND</bfilename><efilename>togxpt</efilename><outpath>/idcdata/dmindata</outpath><starttime></starttime><incfield>keyid</incfield><incfilename>/idcdata/dmining/dminingoracle_ZHOBTMIND_togxpt.keyid</incfilename><timeout>30</timeout><pname>dminingoracle_ZHOBTMIND_togxpt</pname><maxcount>1000</maxcount><connstr1>alex/Alex225166@//192.168.145.128:1521/XEPDB1</connstr1>"
-catlog:
-	cat /log/idc/dminingoracle_ZHOBTMIND.log
-catfile:
-	cat /idcdata/dmining/dminingoracle_ZHOBTMIND_togxpt.keyid
-taillog:
-	tail -f /log/idc/dminingoracle_ZHOBTMIND.log
-headlog:
-	head -n 10 /log/idc/dminingoracle_ZHOBTMIND.log
-cleanlog:
-	rm -rf /log/idc/dminingoracle_ZHOBTMIND.log
-
-
-
-
+db:xmltodb
 cleandb:
-	rm -rf /project/tools/bin/dminingoracle
-	rm -rf /log/idc/dminingoracle_ZHOBTMIND.log
+	rm -rf /project/tools/bin/xmltodb
+	rm -rf /log/idc/xmltodb_vip.log
+rundb:
+	/project/tools/bin/xmltodb "/log/idc/xmltodb_vip.log" "<connstr>idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM</connstr><charset>Simplified Chinese_China.AL32UTF8</charset><inifilename>/project/idc/ini/xmltodb.xml</inifilename><xmlpath>/idcdata/xmltodb/vip</xmlpath><xmlpathbak>/idcdata/xmltodb/vipbak</xmlpathbak><xmlpatherr>/idcdata/xmltodb/viperr</xmlpatherr><timetvl>5</timetvl><timeout>50</timeout><pname>xmltodb_vip</pname>"
+catlog:
+	cat /log/idc/xmltodb_vip.log
+lsv:
+	ls /idcdata/xmltodb/vipbak
+lsvr:
+	ls /idcdata/xmltodb/viper
+taillog:
+	tail -f /log/idc/xmltodb_vip.log
+headlog:
+	head -n 10 /log/idc/xmltodb_vip.log
+cleanlog:
+	rm -rf /log/idc/xmltodb_vip.log

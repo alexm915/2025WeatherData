@@ -40,8 +40,7 @@ struct st_file_info {
   string file_time_;
   st_file_info() = default;
   st_file_info(const string& file_name, const string& file_time)
-      : file_name_(file_name), file_time_(file_time) {
-  }
+      : file_name_(file_name), file_time_(file_time) {}
   void clear() {
     file_name_.clear();
     file_time_.clear();
@@ -130,7 +129,7 @@ int main(int argc, char* argv[]) {
 
   // 将获取到的文件名加载到vfromnlist容器中
   if (load_list_file() == false) {
-    log_file.write("load_list_file() failed.\n");
+    log_file.write("%s", "load_list_file() failed.\n");
     return -1;
   }
 
