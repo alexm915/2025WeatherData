@@ -1,6 +1,7 @@
 # IDE
 .vscode/
 .idea/
+.agents/
 *.code-workspace
 *.swp
 *~
