@@ -9,7 +9,7 @@ ORACPP = /project/public/db/oracle/_ooci.cpp
 CFLAGS = -g
 
 
-all:procctl checkproc deletefiles gzipfiles ftpgetfiles ftpputfiles fileserver tcpputfiles dminingoracle xmltodb
+all:procctl checkproc deletefiles gzipfiles ftpgetfiles ftpputfiles fileserver tcpputfiles dminingoracle xmltodb deletetable migratetable
 
 procctl:procctl.cpp
 	g++ procctl.cpp -o procctl
@@ -41,8 +41,14 @@ dminingoracle:dminingoracle.cpp
 	g++ $(CFLAGS) dminingoracle.cpp -o dminingoracle $(PUBINCL) $(PUBCPP) $(ORAINCL) $(ORALIB) $(ORALIBS) $(ORACPP)
 	mv -f dminingoracle ../bin/.
 xmltodb:xmltodb.cpp _tools.cpp
-	g++ $(CFLAGS) xmltodb.cpp _tools.cpp -g -o xmltodb $(PUBINCL) $(PUBCPP) $(ORAINCL) $(ORALIB) $(ORALIBS) $(ORACPP)
+	g++ $(CFLAGS) xmltodb.cpp _tools.cpp -o xmltodb $(PUBINCL) $(PUBCPP) $(ORAINCL) $(ORALIB) $(ORALIBS) $(ORACPP)
 	mv -f xmltodb ../bin/.
+deletetable:deletetable.cpp
+	g++ $(CFLAGS) deletetable.cpp -o deletetable $(PUBINCL) $(PUBCPP) $(ORAINCL) $(ORALIB) $(ORALIBS) $(ORACPP)
+	mv -f deletetable ../bin/.
+migratetable:migratetable.cpp _tools.cpp
+	g++ $(CFLAGS) migratetable.cpp _tools.cpp -o migratetable $(PUBINCL) $(PUBCPP) $(ORAINCL) $(ORALIB) $(ORALIBS) $(ORACPP)
+	mv -f migratetable ../bin/.
 
 clean:
 	rm -rf ../bin/*
@@ -69,21 +75,27 @@ cleantcp:
 	rm -rf /log/idc/tcpgetfiles_surfdata.log
 	rm -rf /log/idc/fileserver.log
 
-db:xmltodb
-cleandb:
-	rm -rf /project/tools/bin/xmltodb
-	rm -rf /log/idc/xmltodb_vip.log
-rundb:
-	/project/tools/bin/xmltodb "/log/idc/xmltodb_vip.log" "<connstr>idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM</connstr><charset>Simplified Chinese_China.AL32UTF8</charset><inifilename>/project/idc/ini/xmltodb.xml</inifilename><xmlpath>/idcdata/xmltodb/vip</xmlpath><xmlpathbak>/idcdata/xmltodb/vipbak</xmlpathbak><xmlpatherr>/idcdata/xmltodb/viperr</xmlpatherr><timetvl>5</timetvl><timeout>50</timeout><pname>xmltodb_vip</pname>"
-catlog:
-	cat /log/idc/xmltodb_vip.log
-lsv:
-	ls /idcdata/xmltodb/vipbak
-lsvr:
-	ls /idcdata/xmltodb/viper
-taillog:
-	tail -f /log/idc/xmltodb_vip.log
-headlog:
-	head -n 10 /log/idc/xmltodb_vip.log
+dm:deletetable migratetable
+
+cleandm:
+	rm -rf /project/tools/bin/deletetable
+	rm -rf /project/tools/bin/migratetable
+	rm -rf /log/idc/deletetable_ZHOBTMIND.log
+	rm -rf /log/idc/migratetable_ZHOBTMIND1.log
+
+rund:
+	/project/tools/bin/deletetable /log/idc/deletetable_ZHOBTMIND.log "<connstr>idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM</connstr><tname>T_ZHOBTMIND</tname><keycol>rowid</keycol><where>where ddatetime<sysdate-1</where><maxcount>100</maxcount><timeout>120</timeout><pname>deletetable_ZHOBTMIND</pname>"
+runm:
+	/project/tools/bin/migratetable /log/idc/migratetable_ZHOBTMIND1.log "<connstr>idc/Alex225166@//192.168.145.128:1521/SHAREDPLATFORM</connstr><tname>T_ZHOBTMIND1</tname><totname>T_ZHOBTMIND1_HIS</totname><keycol>rowid</keycol><where>where ddatetime<sysdate-0.5</where><maxcount>100</maxcount><timeout>120</timeout><pname>migratetable_ZHOBTMIND1</pname>"
+
+catdlog:
+	cat /log/idc/deletetable_ZHOBTMIND.log
+catmlog:
+	cat /log/idc/migratetable_ZHOBTMIND1.log
+taildlog:
+	tail -f /log/idc/deletetable_ZHOBTMIND.log
+tailmlog:
+	tail -f /log/idc/migratetable_ZHOBTMIND1.log
 cleanlog:
-	rm -rf /log/idc/xmltodb_vip.log
+	rm -rf /log/idc/deletetable_ZHOBTMIND1.log
+	rm -rf /log/idc/migratetable_ZHOBTMIND1.log
